@@ -1,0 +1,43 @@
+Meeting 1 - 6/8
+Todos
+* FDR (false discovery rates, Type I Error), creates q-value, controls Type I Error, student multiple T-test adjusted
+o Identify differentiated genes
+* PCA plot and clustered heatmap
+* Compute average fork change, RTPCR which is used to validate
+* Wait for Seadragon account to access raw data
+* Email DQS-IT for server access
+Informational
+* When the distribution is not normal (low sample size), run ranked test
+o Usually run both t-test and ranked test
+* There are 2 data types: gene expression data and protein data
+* Protein coded genes are used for making proteins
+o Long no-coding, micro, and link RNA are all under research and may not produce results
+* Weekly meeting Friday afternoon, can email or meet anytime through Zoom
+* Qi comes WF
+* Dr. Wang comes MWF
+* Multi-dimensional/high-dimensional analysis very important, bread and butter
+Meeting 2 – 6/19
+To-dos
+* First do t-tests
+o Can use loops
+o Preferable to use multi t-test using class comparison package
+Informational
+* Benjamini-Hochberg method , for controlling FDR (False Discovery Rates)
+* In future, process raw data using Seadragon
+* Beta-uniform distribution
+o Distribution of t-test results
+o Uniform component (no results) vs beta component (results)
+* Use department server for computation
+o X-Windows
+* To fix all-positive heatmap, use standardize?
+o Mean = 0, SD = 1, base R?
+* Focus on statistical significance
+o Appearance is secondary
+o Do not lie using the data
+Meeting 3 – 6/19
+To-dos
+* Eventually use ANOVA to compare multiple groups
+* For now compare treatment vs control seperated by time
+* When limiting FDR, better to use variants instead of metrics
+
+

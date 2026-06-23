@@ -1,0 +1,33 @@
+* When conducting multiple t-tests on many groups, e.g. 20,000+ genes, necessary to control FDR (false discover rate) and reduce Type I Error
+* Techniques include Bonferroni Correction and the Benjamini-Hochberg Procedure
+o Recommended by Dr. Wang to use BHP
+o BHP is less conservative and better for large #s of hypotheses, while Bonferroni Correction is more conservative and better for smaller #s of hypotheses
+o BC controls Family-Wise Error Rate (FWER, chance of ANY Type I error across whole family) while BCP controls FDR (False Discovery Rate, Type I error rate in family)
+* Variants vs Metrics, ask Dr. Peng?
+* Beta-Uniform Mixture Model is a statistical method used to model the distribution of unadjusted p-values
+o Separates noise and truly significant tests
+o Noise is flat/continuous uniform distribution
+o Signfigant p-values cluster near 0 and are modeled by a Beta distribution (Beta(a, 1))
+o Estimates false positive and negative rate
+* Allows for tailored p-value cutoffs
+* Q-plot? Q-values
+
+
+* R supports both OOP (object-oriented programming) and functional programming
+o OOP
+* Uses S3, R6, and S4
+* Uses $ to select the fields from classes
+o Functional programming
+* To transcribe?
+o https://broom.tidymodels.org/
+o https://www.bioconductor.org/packages/release/bioc/html/limma.html
+o https://www.datanovia.com/en/blog/how-to-perform-multiple-t-test-in-r-for-different-variables/
+o https://web.stanford.edu/class/bios221/labs/multi/lab_multtest.html
+* https://bioconductor.org/packages/release/bioc/html/multtest.html
+o https://search.r-project.org/CRAN/refmans/DDPNA/html/multi.t.test.html
+o https://pmc.ncbi.nlm.nih.gov/articles/PMC11541695/
+o ClassComparison
+o OOP
+* @ vs $
+* S4 vs S6
+* Functional vs OOP kind of

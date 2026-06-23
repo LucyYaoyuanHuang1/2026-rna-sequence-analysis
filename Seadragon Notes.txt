@@ -1,0 +1,235 @@
+Lesson 1
+* A cluster is a collection of compute nodes that you access from your terminal
+* A computer node is a single unit of a computer
+* A login node is a shared access point for all users
+o Do NOT run computational tasks on the login nodes
+o Points to $HOME, $SCRATCH, and compute nodes
+* You will login to a login node
+* Then create a file that has instructions to the scheduler
+o Eg. X memory, x CPU cores, x time, x command
+* This file is sent to the scheduler which runs the job on the compute node that it selects
+* Batch system run through a scheduler
+o Batch means the program running is disconnected from the terminal (aka your computer)
+* $HOME is home, has storage you may compute against
+* $SCRATCH has additional storage you may compute against
+* DO NOT run computation tasks on the login node
+o Allowed: download and compile items
+o NOT allowed: anything computational
+* Seadragon cluster example
+o Top: high-speed network InfiniBand, also has ethernet
+o Middle: management nodes and some login nodes
+o Bottom: 24 compute nodes
+* Details
+o Operating system: Redhat Enterprise Linux (RHEL)
+o Job scheduling system: Spectrum Load Sharing Facility (LSF) by IBM
+o Filesystems: Spectrum Scale (a.k.a. GPFS) by IBM
+o Compute:  >600 nodes
+* Memory: 192G – 3T
+* GPU 4x Nvidia V-100
+* $HOME
+o Shortcut for rsrch4/home/department/username
+o Backed up
+* If file accidentally deleted, have 30 days to restore file
+o 1 TB storage (1TB soft quota, 2 TB hard quota grace, try not to use)
+o Can request up to 4TB through mdanderson.servicenowservices.com and comment to ask for storage team, can change permissions and quotas
+* Do NOT change permissions on directories (can lock you out)
+o More quota information: hpcweb.mdanderson.edu/storage.html#ManagingData_quotas
+* $SCRATCH
+o Shortcut for /rsrch4/scratch/dept/username
+o NOT backed up
+o 14 TB compute storage
+o Files are not deleted, so just use
+Lesson 2
+* To access the cluster, must be on MD Anderson network
+o 1st way: VPN (VeloCloud, Cisco AnyConnect)
+* Good for WFH
+* Items.mdanderson.org to order VeloCloud
+o 2nd way: VX Remote (VMWare Horizon client)
+* Comes pre-installed
+* Vxremote.mdanderson.org
+* Best for fast access to cluster
+o 3rd way: Citrix Remote Access (web browser)
+* Ctxgateway.mdanderson.org/Citrix/xa-prdWeb/
+o Documentation
+* HPCWeb.mdanderson.edu
+* User guide: “Connecting to the Cluster”
+o To login to cluster, use standard MD Anderson login, lowercase
+* Password will be same
+o Requires a terminal tool
+* PuTTY, X-Win32, MobaXterm
+* Note: X-Win32 already installed, but MobaXterm better
+* Ssh protocol
+* Hostname is seadragon
+* Can put in username but do NOT put in password
+o Documentation: see above and scroll down
+* Submitting jobs
+o Scheduler: how you submit jobs to the cluster
+o Fair share: jobs are assigned priority based on active usage
+* Less-active users have higher priority
+o Job limits: total CPUs requested across all jobs, per queue, jobs will be put on pending until under limit and then more will be submitted
+* Total memory  requested across all jobs, per queue, large limit no problem
+o GPU queue: 10 CPU cores are automatically assigned for every GPU core requested
+* Please use the least amount of memory and wall time (time based on the clock on the wall) needed for each job
+o Common queues
+* 3 queues – Cdragon, Edragon (e40 and e80), (28 core, 165/350g), (40 core, 475G), (80 core, 950G)
+* Split into short, medium, and long based on wall time (3min, 1 day, 10 days respectively
+* Eg. Short medium long e40short e40medium e40long e80short e80medium e80long
+o Specialty queues
+* Interactive queue: command line access on a compute node, quickly test code without running on login node
+* Eint: also interactive, but for jobs on edragon long
+* Transfer: transfering data between storage devices, accessing data from external data sites such as EGA and GDC, only queue that can access internet
+* Gpu: gpu nodes
+* Highmem: accessing nodes with multiple terabytes of memory
+* Emultinode: jobs that run on multiple nodes, special software required, invitation only (contact HPC-Team)
+QueueWall timeCores per UserTotal Coresinteractive6:007184eint72:0080160transferN/A2884gpu240:0080120Gpu-medium72:004040highmem240:0032176vhighmem240:002448emutinodeN/A8001920o Node attributes
+Node RangeQueues availableMax cores/nodeMax memoryCdragon[001-304]/ [305-404]Short, medium, long, interactive28168G/350GBCdragon[405-406]/[407-410]Vhighmem, highmem/highme24/352900GB/1900GBGdragon[001-002]/[003-004]Gpu, gpu-medium40CPU, 4 GPU168GB CPU, 16/32 GB GPUEdragon[001-030]/[031-040]All e queues2840/80475/950Tdragon[1-3]transfer28168GBEdragon[049-072]emultinode80950GBLesson 3
+* Submitting jobs
+o Complete examples with instructions found at /risapps/example-scripts
+o In linux, command line is called bash, so script is bash script
+o Example script
+* #BSUB  -W 24:00
+* #BSUB – aka Batch SUBmit, aka tells scheduler “this is for you”
+* -W 24:00 – wall time 24:00 request
+* #BSUB –q medium
+* Medium queue
+* #BSUB –o /rsrch3/scratch/your/logdir/or_file
+* Output to /rsrch3/scratch/your/logdir/or_file
+* Recommended to create log directory for my own project, in scratch
+* #BSUB –cwd /rsrch3/scratch/you/working/directory
+* Set working directory /rsrch3/scratch/you/working/directory
+* Can be in home or scratch
+* #BSUB –u myemail@mdanderson.org
+* Sets email, if job fails you will receive email
+* #BSUB –n 12
+* 12 cores
+* #BSUB –M 16
+* Request 16 GB memory
+* #BSUB –R rusage[mem=16]
+* Reserve 16 GB
+* -M and –R must be the same
+* #BSUB –J jobNameHere
+* Optional
+* Upper, lower, special, underscore, etc but no spaces
+* #BSUB –P projectNameHere
+* Optional
+* Get project info from PI
+* Module load app_module/1.2.3
+* Tells system where to find application you are running
+* Make sure application is in working directory if using own software
+* Else make sure to put full path
+* Myprogram arg1 arg2 –threads=12 \
+* If multiple threads needed
+* Must set to same number as number of cores
+* Input=/rsrch3/home/your/project/data\
+* Output=/rsrch3/scratch/your/project/out
+* Input and output can be both home or scratch
+o Managing jobs
+* Seadragon uses the LSF job scheduling script from IBM
+* Bsub < myjob.lsf
+* Submits myjob.lsf (which is found in the current directory)
+* Reply: Job <xxxxxx> is submitted to queue <medium>
+* Type into terminal
+* Bjobs 
+* To view jobs in queue
+* -p for pending, use if your job isn’t submitted after a while
+* -u all for to view all jobs in queue owned by all users
+o EXEC_HOST 5*xxxxx means 5 cores
+o JOB_NAME *xxxx means name cut off
+o 
+* Bkill JobID
+* To cancel job
+o Interactive jobs
+* Can use both submit script and command line
+* [user@ldragon2] $ Bsub –Is –q interactive –W 6:00 –M 16 –T rusage[mem=16] -n1 /bin/bash
+* -Is means interactive (may be submitted to any queue
+* \ escapes carriage return
+* 1 core is typically enough
+*  output: Job <xxxxxx> is submitted to queue <interacti>.
+o <<waiting for dispatch...>>
+o <<starting on cdragon304>>
+* [user@cdragon304] $ (note changed from red to green)
+* color change denotes change from login node to compute node
+o Useful commands
+* bjobs –uall | more
+* show all jobs in queue
+* bjobs –l xxxxxx
+* show detail on one job
+* bjobs –p
+* show pending reasons
+* bkill xxxxxx
+* cancel submitted job
+* bqueues
+* see queue status (slots)
+* bqueues-jobs.sh
+* see queue usage (jobs/slots)
+* bhosts
+* see host status
+* can provide with list of host names
+* lsload –gpuload
+* load gpu load
+
+
+* can provide with list of host names
+* bmod –W xx:xx
+* replace wall time
+Lesson 4
+* Getting help
+o take note of job numbers
+o submit to mdanderson.servicenowservices.com/esc
+* job number, full path to submit script, error message
+o tip: do not mix linux and non-linux text
+o ask a coworker
+o run a test job (add #BSUB –N, overestimate time and memory (24:00 28 cores, 168gb ram, medium), include email address)
+o Ask a question on HPC user group page
+* https://hpcweb.mdanderson.edu/request_help.html
+Lesson 5
+* Environment modules
+o modules manage all of the shared software on the cluster
+o module avail packageName - see which software packages are available
+o module load moduleName – load specific module
+o module unload moduleName
+o show, help, list (list all loaded modules), purge (clear all modules) – other helpful commands
+o variables are automatically carried forward into compute jobs, even when typed on command line
+o (D) means default, (L) means loaded
+* Software
+o Software is provided through modules
+o Install personal libraries for Python, R, Perl
+* Python and R already installed
+* R uses 4.0 or 4.0.0
+* see hpcweb.mdanderson.edu User Guides/Application Software
+o Any personal or downloaded software is installed on $HOME or $SCRATCH
+o Reference data is available, do not install in $HOME
+* Application data /rsrch3/scratch/reflib/REFLIB_data
+* genomic reference data: rsrch3/scratch/reflib
+* request access from storage team
+* Special tools
+o Containers
+* all containers on cdragon use a different engine from Docker
+* Containers are software used to encapsulate an enviroment
+* Use Singularity (specific container software), (which will also run docker images)
+* module load singularity
+* Automatically mounts $HOME, $CWD, /tmp inside container
+o /temp is small, be careful
+* to run a Singularity container on gpu, use –nv
+o GPU processors
+* Add to job script
+* #BSUB –gpu num=1:gmem=16:j_exclusive=yes
+* 1 gpu core, 16gb gpu mem (can go to 32)
+* #BSUB –1 gpu
+o Other tools
+* MATLAB, Jupyter, RStudio, X-Windows all have documentation
+* Additional resources
+o Texas advanced computing center
+* Frontera fasted academic supercomputer in the world
+Additional notes
+* pwd – print working directory
+* cat – concatenate files
+* mv – move and/or rename files
+* cp – copy file
+* chmod – change file permissions
+* man – access documentation (manual)
+* mkdir – make a new directory
+* ls – list directory contents
+* ssh – securely remote login to linux system
+* ../ - parent directory
+* do NOT use shell scripts to submit multiple jobs
