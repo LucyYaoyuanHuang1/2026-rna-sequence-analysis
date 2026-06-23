@@ -9,14 +9,16 @@
   library("circlize")
   library("ClassComparison")
   library("effectsize")
+  library("stringr")
 
 #read in sample data----
-sample_data <-  read.csv("Samples.csv")
+sample_data <-  read.csv("Samples.csv") %>% mutate(Sample = str_replace_all(Sample,"-","."))
 #read in pool data, set the first column as rownames, as matrix, apply log(x + 1) (addition first to avoid -Inf, might be cause of no negatives?)
-pool_data = read.csv("pool.tpm_Gene.csv") %>%  column_to_rownames(var = "X") %>% as.matrix() %>% add(1) %>% log2()
+pool_data = read.csv("pool.tpm_Gene.csv") 
+#%>%  column_to_rownames(var = "X") %>% as.matrix() %>% add(1) %>% log2()
 
 
-#multi t-testing48H----
+#multi t-testing 48H----
   A_classes <- sample_data %>% as_tibble() %>% filter(Group == "Control 48H" | Group == "TTFields 48H") %>% select(Group) %>% pull(Group)%>% factor()
   A_mttest <- MultiTtest(pool_data, A_classes)
   summary(A_mttest)
@@ -26,7 +28,7 @@ pool_data = read.csv("pool.tpm_Gene.csv") %>%  column_to_rownames(var = "X") %>%
   hist(A_bum, main = "48H")
   A_signifigant_genes <- selectSignificant(A_bum, alpha = .05,by = "FDR")
   
-  #multi t-testing72H----
+  #multi t-testing 72H----
   B_classes <- sample_data %>% as_tibble() %>% filter(Group == "Control 48H" | Group == "TTFields 48H") %>% select(Group) %>% pull(Group)%>% factor()
   B_mttest <- MultiTtest(pool_data, B_classes)
   summary(B_mttest)
@@ -38,6 +40,7 @@ pool_data = read.csv("pool.tpm_Gene.csv") %>%  column_to_rownames(var = "X") %>%
 
 
 #heatmaps----
+  
   #general and reference----
   
   #for ease of constant plot creation, use head as test data, and standardize for legibility of graph (+ and - values for diff colors)
@@ -71,6 +74,7 @@ pool_data = read.csv("pool.tpm_Gene.csv") %>%  column_to_rownames(var = "X") %>%
     top_annotation = column_heatmap_annotation)
   heatmap_control_ttfields
   #48H----
+    forty_eight_hours = sample_data %>% filter(TimePoint == "48H")
     column_heatmap_annotation_48h = HeatmapAnnotation(
       group = sample_data$Group, 
       col = list(group = c(
@@ -78,9 +82,8 @@ pool_data = read.csv("pool.tpm_Gene.csv") %>%  column_to_rownames(var = "X") %>%
       "Control 48H" = "blue"),
       height = unit(200, "cm")))
   
-  
     heatmap_48h_control_ttfields <- Heatmap(
-      small_pool_data,
+      small_pool_data %>% as_tibble() %>% semi_join(sample_data, by = ),
       name = "Group", 
       col = color_function, 
       row_dend_width = unit(.1, "cm"), 
