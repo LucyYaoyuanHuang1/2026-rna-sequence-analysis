@@ -11,32 +11,75 @@
   library("effectsize")
   library("stringr")
 
-#read in sample data----
-sample_data <-  read.csv("Samples.csv") %>% mutate(Sample = str_replace_all(Sample,"-","."))
-#read in pool data, set the first column as rownames, as matrix, apply log(x + 1) (addition first to avoid -Inf, might be cause of no negatives?)
-pool_data = read.csv("pool.tpm_Gene.csv") 
-#%>%  column_to_rownames(var = "X") %>% as.matrix() %>% add(1) %>% log2()
-
+#read in and prepare data----
+  sample_data <- 
+    read.csv("Samples.csv") %>% 
+    mutate(Sample = str_replace_all(Sample,"-",".")) %>% 
+    as_tibble()
+  #read in pool data, set the first column as rownames, as matrix, apply log(x + 1)
+  pool_data <- 
+    read.csv("pool.tpm_Gene.csv") %>%  
+    column_to_rownames(var = "X") %>% 
+    mutate(across(where(is.double), ~add(.x, 1))) %>% 
+    mutate(across(where(is.double), log2)) %>% 
+    t() %>% 
+    as.data.frame() %>% 
+    rownames_to_column(var = "Sample")
+  a_data <- pool_data %>% 
+    semi_join(sample_data %>% 
+    filter(TimePoint == "48H"), by = join_by(Sample)) %>% 
+    column_to_rownames(var = "Sample") %>% 
+    t()
+  a_classes <- 
+    sample_data %>% 
+    filter(TimePoint == "48H") %>% 
+    select(Group) %>% pull(Group) %>% 
+    factor()
+  b_data <- 
+    pool_data %>% 
+    semi_join(sample_data %>% 
+    filter(TimePoint == "72H"), by = join_by(Sample)) %>% 
+    column_to_rownames(var = "Sample") %>% 
+    t()
+  b_classes <- 
+    sample_data %>% 
+    filter(TimePoint == "72H") %>% 
+    select(Group) %>% pull(Group)%>% 
+    factor()
+  c_data <- 
+    pool_data %>% 
+    semi_join(sample_data %>% 
+    filter(Treatment == "TTFields"), by = join_by(Sample)) %>% 
+    column_to_rownames(var = "Sample") %>% 
+    t()
+  c_classes <- 
+    sample_data %>% 
+    filter(Treatment == "TTFields") %>% 
+    select(Group) %>% pull(Group)%>% 
+    factor()
+  Pvalcut<-c(0.00001,0.0001,0.001,0.005,0.01,0.05,seq(0.1,1,by=0.05))
 
 #multi t-testing 48H----
-  A_classes <- sample_data %>% as_tibble() %>% filter(Group == "Control 48H" | Group == "TTFields 48H") %>% select(Group) %>% pull(Group)%>% factor()
-  A_mttest <- MultiTtest(pool_data, A_classes)
-  summary(A_mttest)
-  A_bum <- Bum(A_mttest@p.values)
-  Pvalcut<-c(0.00001,0.0001,0.001,0.005,0.01,0.05,seq(0.1,1,by=0.05))
-  summary(A_bum, Pvalcut)
-  hist(A_bum, main = "48H")
-  A_signifigant_genes <- selectSignificant(A_bum, alpha = .05,by = "FDR")
+  a_mttest <- MultiTtest(a_data, a_classes, na.rm = FALSE)
+#  summary(a_mttest)
+  a_bum <- Bum(a_mttest@p.values)
+  hist(a_bum, main = "48H")
+  a_signifigant_genes <- a_data[selectSignificant(a_bum, alpha = .05,by = "FDR"),] %>% na.omit()
   
   #multi t-testing 72H----
-  B_classes <- sample_data %>% as_tibble() %>% filter(Group == "Control 48H" | Group == "TTFields 48H") %>% select(Group) %>% pull(Group)%>% factor()
-  B_mttest <- MultiTtest(pool_data, B_classes)
-  summary(B_mttest)
-  B_bum <- Bum(B_mttest@p.values)
-  Pvalcut<-c(0.00001,0.0001,0.001,0.005,0.01,0.05,seq(0.1,1,by=0.05))
-  summary(B_bum, Pvalcut)
-  hist(B_bum, main = "72H")
-  B_signifigant_genes <- selectSignificant(B_bum, alpha = .05,by = "FDR")
+  #ask if na.rm should be false
+  b_mttest <- MultiTtest(b_data, b_classes, na.rm = FALSE)
+  summary(b_mttest)
+  b_bum <- Bum(b_mttest@p.values)
+  hist(b_bum, main = "72H")
+  b_signifigant_genes <- b_data[selectSignificant(b_bum, alpha = .05,by = "FDR"),] %>% na.omit()
+  
+  #multi t-testing TTFields----
+  c_mttest <- MultiTtest(c_data, c_classes, na.rm = FALSE)
+  summary(c_mttest)
+  c_bum <- Bum(c_mttest@p.values)
+  hist(c_bum, main = "TTFields")
+  c_signifigant_genes <- c_data[selectSignificant(c_bum, alpha = .05,by = "FDR"),] %>% na.omit()
 
 
 #heatmaps----
