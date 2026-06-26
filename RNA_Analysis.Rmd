@@ -1,0 +1,123 @@
+---
+title: "RNA Analysis"
+output: html_document
+date: "2026-06-26"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+## Introduction
+
+### Abstract
+
+### Objectives
+
+### Methods
+
+### Results
+
+## R Code
+
+### Libraries
+```{r libraries, message = FALSE}
+  library("tidyverse")
+  library("ComplexHeatmap")
+  library("circlize")
+  library("ClassComparison")
+  library("effectsize")
+  library("magrittr")
+```
+### Data Loading and Processing
+```{r data}
+  setwd("C:/Users/Lyhuang/Downloads/Data")
+
+  sample_data <- 
+    read.csv("Samples.csv") %>% 
+    mutate(Sample = str_replace_all(Sample,"-",".")) %>% 
+    as_tibble()
+  
+   pool_data <- 
+      read.csv("pool.tpm_Gene.csv") %>%  
+      column_to_rownames(var = "X") %>% 
+      mutate(across(where(is.double), ~add(.x, 1))) %>% 
+      mutate(across(where(is.double), log2)) %>% 
+      t() %>% 
+      as.data.frame() %>% 
+      rownames_to_column(var = "Sample")
+   
+    a_data <- pool_data %>% 
+      semi_join(sample_data %>% 
+      filter(TimePoint == "48H"), by = join_by(Sample)) %>% 
+      column_to_rownames(var = "Sample") %>% 
+      t()
+    
+    a_classes <- 
+      sample_data %>% 
+      filter(TimePoint == "48H") %>% 
+      select(Group) %>% pull(Group) %>% 
+      factor()
+    
+    b_data <- 
+      pool_data %>% 
+      semi_join(sample_data %>% 
+      filter(TimePoint == "72H"), by = join_by(Sample)) %>% 
+      column_to_rownames(var = "Sample") %>% 
+      t()
+    
+    b_classes <- 
+      sample_data %>% 
+      filter(TimePoint == "72H") %>% 
+      select(Group) %>% pull(Group)%>% 
+      factor()
+    
+    c_data <- 
+      pool_data %>% 
+      semi_join(sample_data %>% 
+      filter(Treatment == "TTFields"), by = join_by(Sample)) %>% 
+      column_to_rownames(var = "Sample") %>% 
+      t()
+    
+    c_classes <- 
+      sample_data %>% 
+      filter(Treatment == "TTFields") %>% 
+      select(Group) %>% pull(Group)%>% 
+      factor()
+    
+    Pvalcut<-c(0.00001,0.0001,0.001,0.005,0.01,0.05,seq(0.1,1,by=0.05))
+```
+First the working directory is set. Then, the data is loaded in from 2 sources: sample data from Samples.csv and genetic data from pool.tpm_gene.csv.The genetic data has the function log_2(x + 1) applied and the data is arranged for ease of legibility for the proceeding data analysis.
+
+### Data Analysis
+```{r}
+  a_mttest <- MultiTtest(a_data, a_classes, na.rm = FALSE)
+  a_bum <- Bum(a_mttest@p.values)
+  hist(a_bum, main = "48H")
+  a_significant_genes <- a_data[selectSignificant(a_bum, alpha = .05, by = "FDR"),] %>% na.omit()
+```
+Using MultTtest, multiple t-tests are run to produce p-values for the significance of every gene. These p-values are then evaluated using the Bum (Beta-Uniform Mixture) class to analyze p-value distribution The beta-uniform mixture graph shows a strong spike near 0, following a beta distribution as opposed to a uniform distribution, denoting the presence of truly significant p-values. Significant genes are identified using the Benjamini-Hochberg method to control false discovery rates to .05.
+
+```{r}  
+  b_mttest <- MultiTtest(b_data, b_classes, na.rm = TRUE)
+  b_bum <- Bum(b_mttest@p.values)
+  hist(b_bum, main = "72H")
+  b_significant_genes <- b_data[selectSignificant(b_bum, alpha = .05,by = "FDR"),] %>% na.omit()
+  
+  c_mttest <- MultiTtest(c_data, c_classes, na.rm = FALSE)
+  c_bum <- Bum(c_mttest@p.values)
+  hist(c_bum, main = "TTFields")
+  c_significant_genes <- c_data[selectSignificant(c_bum, alpha = .05,by = "FDR"),] %>% na.omit()
+```
+This is then repeated to compare
+### Graphs
+
+### Acknowledgements and Citations
+
+
+
+
+
+
+
