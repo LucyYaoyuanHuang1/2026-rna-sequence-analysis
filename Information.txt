@@ -31,3 +31,15 @@ o OOP
 * @ vs $
 * S4 vs S6
 * Functional vs OOP kind of
+
+
+* Fold change
+o https://pmc.ncbi.nlm.nih.gov/articles/PMC11352044/ 
+o Fold change is commonly used in bioinformatics for quantifiying group differences in “omics” variables (genomics, transcriptomics, proteomics), but mostly in gene expression studies
+o FC provides a measure for selecting genes of interest along with unusual ratio univariate testing with alpha-correction for multiple experiments (used), analysis of variance, and noise sampling
+* Possible problem with normalilty
+o Both t-test and fold change need normalized data
+o Sample size n=7, not enough for central limit theorem
+o https://pmc.ncbi.nlm.nih.gov/articles/PMC4120293/ 
+o 
+
