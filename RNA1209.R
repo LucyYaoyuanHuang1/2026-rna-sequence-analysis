@@ -23,6 +23,12 @@
     t() %>% 
     as.data.frame() %>% 
     rownames_to_column(var = "Sample")
+  #taking a look at base data distribution
+  long_pool = pool_data %>% pivot_longer(cols = !Sample, names_to = "gene", values_to = "values")
+  ggplot(long_pool, mapping = aes(x = values)) + geom_histogram(binwidth = .02) + 
+    labs(title = "ggplot(long_pool, mapping = aes(x = values)) + geom_histogram(binwidth = .02)")
+  ggplot(long_pool, mapping = aes(sample = values)) + geom_qq_line() +geom_qq() + 
+  
   a_data <- pool_data %>% 
     semi_join(sample_data %>% 
     filter(TimePoint == "48H"), by = join_by(Sample)) %>% 
@@ -55,25 +61,25 @@
     filter(Treatment == "TTFields") %>% 
     select(Group) %>% pull(Group)%>% 
     factor()
-  Pvalcut<-c(0.00001,0.0001,0.001,0.005,0.01,0.05,seq(0.1,1,by=0.05))
-
+  
 #multi t-testing 48H----
   a_mttest <- MultiTtest(a_data, a_classes, na.rm = FALSE)
   a_bum <- Bum(a_mttest@p.values)
   hist(a_bum, main = "48H")
-  a_significant_genes <- a_data[selectSignificant(a_bum, alpha = .05, by = "FDR"),] %>% na.omit()
+  a_cutoff = cutoffSignificant(a_bum, alpha = .05, by = "FDR")
+  a_significant_genes <- a_data[selectSignificant(a_bum, by = "FDR"),] %>% na.omit()
   
   #multi t-testing 72H----
   b_mttest <- MultiTtest(b_data, b_classes, na.rm = TRUE)
   b_bum <- Bum(b_mttest@p.values)
   hist(b_bum, main = "72H")
-  b_significant_genes <- b_data[selectSignificant(b_bum, alpha = .05,by = "FDR"),] %>% na.omit()
+  b_significant_genes <- b_data[selectSignificant(b_bum, alpha = .01, by = "FDR"),] %>% na.omit()
   
   #multi t-testing TTFields----
   c_mttest <- MultiTtest(c_data, c_classes, na.rm = FALSE)
   c_bum <- Bum(c_mttest@p.values)
   hist(c_bum, main = "TTFields")
-  c_significant_genes <- c_data[selectSignificant(c_bum, alpha = .05,by = "FDR"),] %>% na.omit()
+  c_significant_genes <- c_data[selectSignificant(c_bum, alpha = .01,by = "FDR"),] %>% na.omit()
 
 
 #heatmaps----
@@ -91,10 +97,11 @@
   #sample_data$group(possible sources of error: using sample_data for grouping, read documentation)
 
     column_heatmap_annotation_48H = HeatmapAnnotation(
-      group = a_classes
+      Group = a_classes,
+      col = list(Group = c("Control 48H" = 3, "TTFields 48H" = 6))
     )
     heatmap_48h_control_ttfields <- Heatmap(
-      a_significant_genes %>% standardize(),
+      a_significant_genes  %>% standardize(),
       top_annotation = column_heatmap_annotation_48H,
       name = "Group", 
       col = color_function, 
@@ -102,6 +109,12 @@
       row_names_gp = gpar(fontsize = 2),
     )
     heatmap_48h_control_ttfields
+    
+#Fold changes and volcano maps----
+    #Fold changes----
+    a_fold_change = a_data$ / a_data
+    
+    #Volcano maps----
     
   
 #heatmap notes----
