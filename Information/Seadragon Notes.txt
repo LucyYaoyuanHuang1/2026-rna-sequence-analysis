@@ -24,7 +24,7 @@ o Operating system: Redhat Enterprise Linux (RHEL)
 o Job scheduling system: Spectrum Load Sharing Facility (LSF) by IBM
 o Filesystems: Spectrum Scale (a.k.a. GPFS) by IBM
 o Compute:  >600 nodes
-* Memory: 192G ñ 3T
+* Memory: 192G ‚Äì 3T
 * GPU 4x Nvidia V-100
 * $HOME
 o Shortcut for rsrch4/home/department/username
@@ -52,7 +52,7 @@ o 3rd way: Citrix Remote Access (web browser)
 * Ctxgateway.mdanderson.org/Citrix/xa-prdWeb/
 o Documentation
 * HPCWeb.mdanderson.edu
-* User guide: ìConnecting to the Clusterî
+* User guide: ‚ÄúConnecting to the Cluster‚Äù
 o To login to cluster, use standard MD Anderson login, lowercase
 * Password will be same
 o Requires a terminal tool
@@ -71,7 +71,7 @@ o Job limits: total CPUs requested across all jobs, per queue, jobs will be put 
 o GPU queue: 10 CPU cores are automatically assigned for every GPU core requested
 * Please use the least amount of memory and wall time (time based on the clock on the wall) needed for each job
 o Common queues
-* 3 queues ñ Cdragon, Edragon (e40 and e80), (28 core, 165/350g), (40 core, 475G), (80 core, 950G)
+* 3 queues ‚Äì Cdragon, Edragon (e40 and e80), (28 core, 165/350g), (40 core, 475G), (80 core, 950G)
 * Split into short, medium, and long based on wall time (3min, 1 day, 10 days respectively
 * Eg. Short medium long e40short e40medium e40long e80short e80medium e80long
 o Specialty queues
@@ -81,43 +81,107 @@ o Specialty queues
 * Gpu: gpu nodes
 * Highmem: accessing nodes with multiple terabytes of memory
 * Emultinode: jobs that run on multiple nodes, special software required, invitation only (contact HPC-Team)
-QueueWall timeCores per UserTotal Coresinteractive6:007184eint72:0080160transferN/A2884gpu240:0080120Gpu-medium72:004040highmem240:0032176vhighmem240:002448emutinodeN/A8001920o Node attributes
-Node RangeQueues availableMax cores/nodeMax memoryCdragon[001-304]/ [305-404]Short, medium, long, interactive28168G/350GBCdragon[405-406]/[407-410]Vhighmem, highmem/highme24/352900GB/1900GBGdragon[001-002]/[003-004]Gpu, gpu-medium40CPU, 4 GPU168GB CPU, 16/32 GB GPUEdragon[001-030]/[031-040]All e queues2840/80475/950Tdragon[1-3]transfer28168GBEdragon[049-072]emultinode80950GBLesson 3
+Queue
+Wall time
+Cores per User
+Total Cores
+interactive
+6:00
+7
+184
+eint
+72:00
+80
+160
+transfer
+N/A
+28
+84
+gpu
+240:00
+80
+120
+Gpu-medium
+72:00
+40
+40
+highmem
+240:00
+32
+176
+vhighmem
+240:00
+24
+48
+emutinode
+N/A
+800
+1920
+o Node attributes
+Node Range
+Queues available
+Max cores/node
+Max memory
+Cdragon[001-304]/ [305-404]
+Short, medium, long, interactive
+28
+168G/350GB
+Cdragon[405-406]/[407-410]
+Vhighmem, highmem/highme
+24/35
+2900GB/1900GB
+Gdragon[001-002]/[003-004]
+Gpu, gpu-medium
+40CPU, 4 GPU
+168GB CPU, 16/32 GB GPU
+Edragon[001-030]/[031-040]
+All e queues
+2840/80
+475/950
+Tdragon[1-3]
+transfer
+28
+168GB
+Edragon[049-072]
+emultinode
+80
+950GB
+Lesson 3
 * Submitting jobs
 o Complete examples with instructions found at /risapps/example-scripts
 o In linux, command line is called bash, so script is bash script
 o Example script
 * #BSUB  -W 24:00
-* #BSUB ñ aka Batch SUBmit, aka tells scheduler ìthis is for youî
-* -W 24:00 ñ wall time 24:00 request
-* #BSUB ñq medium
+* #BSUB ‚Äì aka Batch SUBmit, aka tells scheduler ‚Äúthis is for you‚Äù
+* -W 24:00 ‚Äì wall time 24:00 request
+* #BSUB ‚Äìq medium
 * Medium queue
-* #BSUB ño /rsrch3/scratch/your/logdir/or_file
+* #BSUB ‚Äìo /rsrch3/scratch/your/logdir/or_file
 * Output to /rsrch3/scratch/your/logdir/or_file
 * Recommended to create log directory for my own project, in scratch
-* #BSUB ñcwd /rsrch3/scratch/you/working/directory
+* #BSUB ‚Äìcwd /rsrch3/scratch/you/working/directory
 * Set working directory /rsrch3/scratch/you/working/directory
 * Can be in home or scratch
-* #BSUB ñu myemail@mdanderson.org
+* #BSUB ‚Äìu myemail@mdanderson.org
 * Sets email, if job fails you will receive email
-* #BSUB ñn 12
+* #BSUB ‚Äìn 12
 * 12 cores
-* #BSUB ñM 16
+* #BSUB ‚ÄìM 16
 * Request 16 GB memory
-* #BSUB ñR rusage[mem=16]
+* #BSUB ‚ÄìR rusage[mem=16]
 * Reserve 16 GB
-* -M and ñR must be the same
-* #BSUB ñJ jobNameHere
+* -M and ‚ÄìR must be the same
+* #BSUB ‚ÄìJ jobNameHere
 * Optional
 * Upper, lower, special, underscore, etc but no spaces
-* #BSUB ñP projectNameHere
+* #BSUB ‚ÄìP projectNameHere
 * Optional
 * Get project info from PI
 * Module load app_module/1.2.3
 * Tells system where to find application you are running
 * Make sure application is in working directory if using own software
 * Else make sure to put full path
-* Myprogram arg1 arg2 ñthreads=12 \
+* Myprogram arg1 arg2 ‚Äìthreads=12 \
 * If multiple threads needed
 * Must set to same number as number of cores
 * Input=/rsrch3/home/your/project/data\
@@ -131,7 +195,7 @@ o Managing jobs
 * Type into terminal
 * Bjobs 
 * To view jobs in queue
-* -p for pending, use if your job isnít submitted after a while
+* -p for pending, use if your job isn‚Äôt submitted after a while
 * -u all for to view all jobs in queue owned by all users
 o EXEC_HOST 5*xxxxx means 5 cores
 o JOB_NAME *xxxx means name cut off
@@ -140,7 +204,7 @@ o
 * To cancel job
 o Interactive jobs
 * Can use both submit script and command line
-* [user@ldragon2] $ Bsub ñIs ñq interactive ñW 6:00 ñM 16 ñT rusage[mem=16] -n1 /bin/bash
+* [user@ldragon2] $ Bsub ‚ÄìIs ‚Äìq interactive ‚ÄìW 6:00 ‚ÄìM 16 ‚ÄìT rusage[mem=16] -n1 /bin/bash
 * -Is means interactive (may be submitted to any queue
 * \ escapes carriage return
 * 1 core is typically enough
@@ -150,11 +214,11 @@ o <<starting on cdragon304>>
 * [user@cdragon304] $ (note changed from red to green)
 * color change denotes change from login node to compute node
 o Useful commands
-* bjobs ñuall | more
+* bjobs ‚Äìuall | more
 * show all jobs in queue
-* bjobs ñl xxxxxx
+* bjobs ‚Äìl xxxxxx
 * show detail on one job
-* bjobs ñp
+* bjobs ‚Äìp
 * show pending reasons
 * bkill xxxxxx
 * cancel submitted job
@@ -165,12 +229,12 @@ o Useful commands
 * bhosts
 * see host status
 * can provide with list of host names
-* lsload ñgpuload
+* lsload ‚Äìgpuload
 * load gpu load
 
 
 * can provide with list of host names
-* bmod ñW xx:xx
+* bmod ‚ÄìW xx:xx
 * replace wall time
 Lesson 4
 * Getting help
@@ -179,16 +243,16 @@ o submit to mdanderson.servicenowservices.com/esc
 * job number, full path to submit script, error message
 o tip: do not mix linux and non-linux text
 o ask a coworker
-o run a test job (add #BSUB ñN, overestimate time and memory (24:00 28 cores, 168gb ram, medium), include email address)
+o run a test job (add #BSUB ‚ÄìN, overestimate time and memory (24:00 28 cores, 168gb ram, medium), include email address)
 o Ask a question on HPC user group page
 * https://hpcweb.mdanderson.edu/request_help.html
 Lesson 5
 * Environment modules
 o modules manage all of the shared software on the cluster
 o module avail packageName - see which software packages are available
-o module load moduleName ñ load specific module
+o module load moduleName ‚Äì load specific module
 o module unload moduleName
-o show, help, list (list all loaded modules), purge (clear all modules) ñ other helpful commands
+o show, help, list (list all loaded modules), purge (clear all modules) ‚Äì other helpful commands
 o variables are automatically carried forward into compute jobs, even when typed on command line
 o (D) means default, (L) means loaded
 * Software
@@ -210,26 +274,26 @@ o Containers
 * module load singularity
 * Automatically mounts $HOME, $CWD, /tmp inside container
 o /temp is small, be careful
-* to run a Singularity container on gpu, use ñnv
+* to run a Singularity container on gpu, use ‚Äìnv
 o GPU processors
 * Add to job script
-* #BSUB ñgpu num=1:gmem=16:j_exclusive=yes
+* #BSUB ‚Äìgpu num=1:gmem=16:j_exclusive=yes
 * 1 gpu core, 16gb gpu mem (can go to 32)
-* #BSUB ñ1 gpu
+* #BSUB ‚Äì1 gpu
 o Other tools
 * MATLAB, Jupyter, RStudio, X-Windows all have documentation
 * Additional resources
 o Texas advanced computing center
 * Frontera fasted academic supercomputer in the world
 Additional notes
-* pwd ñ print working directory
-* cat ñ concatenate files
-* mv ñ move and/or rename files
-* cp ñ copy file
-* chmod ñ change file permissions
-* man ñ access documentation (manual)
-* mkdir ñ make a new directory
-* ls ñ list directory contents
-* ssh ñ securely remote login to linux system
+* pwd ‚Äì print working directory
+* cat ‚Äì concatenate files
+* mv ‚Äì move and/or rename files
+* cp ‚Äì copy file
+* chmod ‚Äì change file permissions
+* man ‚Äì access documentation (manual)
+* mkdir ‚Äì make a new directory
+* ls ‚Äì list directory contents
+* ssh ‚Äì securely remote login to linux system
 * ../ - parent directory
 * do NOT use shell scripts to submit multiple jobs
