@@ -16,7 +16,7 @@ o Long no-coding, micro, and link RNA are all under research and may not produce
 * Qi comes WF
 * Dr. Wang comes MWF
 * Multi-dimensional/high-dimensional analysis very important, bread and butter
-Meeting 2 – 6/19
+Meeting 2 â€“ 6/19
 To-dos
 * First do t-tests
 o Can use loops
@@ -34,7 +34,7 @@ o Mean = 0, SD = 1, base R?
 * Focus on statistical significance
 o Appearance is secondary
 o Do not lie using the data
-Meeting 3 – 6/19
+Meeting 3 â€“ 6/19
 To-dos
 * Eventually use ANOVA to compare multiple groups
 * For now compare treatment vs control seperated by time
