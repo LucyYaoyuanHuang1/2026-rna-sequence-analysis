@@ -2,13 +2,14 @@
   #set working directory, for clarity, following Qi
   setwd("C:/Users/Lyhuang/Downloads/Data")
   library("tidyverse")
-  library("ComplexHeatmap")
+#  library("ComplexHeatmap")
   library("circlize")
   library("ClassComparison")
   library("effectsize")
   library("magrittr")
   library("qqplotr")
   library("patchwork")
+  library("pheatmap")
 
 #read in and prepare data----
   sample_data <- 
@@ -97,20 +98,18 @@
   a_bum <- Bum(a_mttest@p.values)
   hist(a_bum, main = "48H")
   a_cutoff = cutoffSignificant(a_bum, alpha = .05, by = "FDR")
-  a_significant_genes <- a_data[selectSignificant(a_bum, by = "FDR"),] %>% na.omit()
+  a_significant_genes <- a_data[selectSignificant(a_bum, alpha = .01, by = "FDR"),] %>% na.omit() %>% as.data.frame () %>% rownames_to_column(var = "Gene")
   
   #multi t-testing 72H
   b_mttest <- MultiTtest(b_data, b_classes, na.rm = TRUE)
   b_bum <- Bum(b_mttest@p.values)
   hist(b_bum, main = "72H")
-  b_significant_genes <- b_data[selectSignificant(b_bum, alpha = .01, by = "FDR"),] %>% na.omit()
-  
+  b_significant_genes <- b_data[selectSignificant(b_bum, alpha = .01, by = "FDR"),] %>% na.omit() %>% as.data.frame () %>% rownames_to_column(var = "Gene")
   #multi t-testing TTFields
   c_mttest <- MultiTtest(c_data, c_classes, na.rm = FALSE)
   c_bum <- Bum(c_mttest@p.values)
   hist(c_bum, main = "TTFields")
-  c_significant_genes <- c_data[selectSignificant(c_bum, alpha = .01,by = "FDR"),] %>% na.omit()
-
+  c_significant_genes <- c_data[selectSignificant(c_bum, alpha = .01,by = "FDR"),] %>% na.omit() %>%  as.data.frame () %>% rownames_to_column(var = "Gene")
 #Fold changes----
   geo_mean <- function(){
     log_pool_data %>% 
@@ -122,15 +121,19 @@
   }
   geo_means <- geo_mean()
   
-  fold_change <- function (geo_mean_data, group_1, group_2){
+  fold_change <- function (geo_mean_data, group_1, group_2, sig_genes){
     geo_mean_data %>% 
-      pivot_longer(cols = !Group, names_to = "Gene", values_to = "data") %>% 
-      group_by(Gene) %>% 
-      mutate(foch = ({{group_1}} - {{group_2}})) %>% 
+      column_to_rownames(var = "Group") %>% 
+       t() %>% 
+       as_tibble(rownames = "Gene") %>% 
+       mutate(fold_change = ({{group_1}} - {{group_2}})) %>% 
+      semi_join(sig_genes, by = "Gene") %>% 
+      select(Gene, {{group_1}}, {{group_2}}, fold_change) %>% 
       return()
   }
-#todo subtract group1 from group2
-  fc = fold_change(geo_means, `Control 48H`, `TTFields 48H`)
+  fc_a = fold_change(geo_means, `Control 48H`, `TTFields 48H`, a_significant_genes)
+  fc_b = fold_change(geo_means, `Control 72H`, `TTFields 72H`, b_significant_genes)
+  fc_c = fold_change(geo_means, `TTFields 48H`, `TTFields 72H`, c_significant_genes)
   
   
 #Volcano maps----
@@ -147,7 +150,7 @@
       col = list(Group = c("Control 48H" = 3, "TTFields 48H" = 6))
     )
     heatmap_48h_control_ttfields <- Heatmap(
-      a_significant_genes  %>% standardize(),
+      a_significant_genes %>% standardize(),
       top_annotation = column_heatmap_annotation_48H,
       name = "Group", 
       col = color_function, 
