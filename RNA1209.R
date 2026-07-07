@@ -35,6 +35,7 @@
 #taking a look at base data distribution----
   long_pool = pool_data %>% pivot_longer(cols = !Sample, names_to = "gene", values_to = "values") %>% filter(values >0) %>% slice(1:400)
   log_long_pool = log_pool_data %>% pivot_longer(cols = !Sample, names_to = "gene", values_to = "values") %>% filter(values >0) %>% slice(1:400)
+  no_zero_log = pool_data %>% filter(rowSums(across(everything()) != 0) > 0)
   
   hist <- ggplot(long_pool, mapping = aes(x = values)) + geom_histogram(bins = 100, fill = "green", alpha = .5) + 
     xlab("ggplot(long_pool, mapping = aes(x = values)) + geom_histogram(bins = 100, fill = 'green', alpha = .5)") + 
@@ -83,8 +84,15 @@
   a_data <- make_data(TimePoint, "48H")
   b_data <- make_data(TimePoint, "72H")
   c_data <- make_data(Treatment, "TTFields")
-  
 #multi t-testing 48H----
+  mttest <- function(data, classes) {
+    temp_mttest <- MultiTtest(data, classes, na.rm = FALSE)
+    a_bum <- Bum(a_mttest@p.values)
+    hist(a_bum, main = "48H")
+    a_cutoff = cutoffSignificant(a_bum, alpha = .05, by = "FDR")
+    a_significant_genes <- a_data[selectSignificant(a_bum, by = "FDR"),] %>% na.omit()
+  }
+  
   a_mttest <- MultiTtest(a_data, a_classes, na.rm = FALSE)
   a_bum <- Bum(a_mttest@p.values)
   hist(a_bum, main = "48H")
@@ -104,29 +112,26 @@
   c_significant_genes <- c_data[selectSignificant(c_bum, alpha = .01,by = "FDR"),] %>% na.omit()
 
 #Fold changes----
-  geo_mean <- function(attribute) {
+  geo_mean <- function(){
     log_pool_data %>% 
-    semi_join(sample_data %>% 
-                filter(Group == attribute), by = join_by(Sample)) %>% 
-    column_to_rownames("Sample") %>% 
-    t() %>% 
-    as.data.frame() %>% 
-    rownames_to_column(var = "Genes") %>% 
-    rowwise() %>% 
-    mutate(geo_mean = mean) %>% 
-    return ()
-  }
-  
-  geo_mean <- function(attribute) {
-    log_pool_data %>% 
-      semi_join(sample_data %>% 
-                  filter(Group == attribute), by = join_by(Sample)) %>% 
-      column_to_rownames("Sample") %>% 
-      rownames_to_column(var = "rowname") %>% 
-      pivot_longer(cols = !rowname) %>% 
+      full_join(sample_data %>% 
+                  select(Group, Sample), by = join_by(Sample)) %>%
+      group_by(Group) %>% 
+      summarize_if(is.numeric, mean) %>% 
       return()
   }
-  geo_mean_48H_ttfields <- geo_mean("TTFields 48H")
+  geo_means <- geo_mean()
+  
+  fold_change <- function (geo_mean_data, group_1, group_2){
+    geo_mean_data %>% 
+      pivot_longer(cols = !Group, names_to = "Gene", values_to = "data") %>% 
+      group_by(Gene) %>% 
+      mutate(foch = ({{group_1}} - {{group_2}})) %>% 
+      return()
+  }
+#todo subtract group1 from group2
+  fc = fold_change(geo_means, `Control 48H`, `TTFields 48H`)
+  
   
 #Volcano maps----
 #heatmaps----
