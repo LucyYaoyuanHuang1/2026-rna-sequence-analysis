@@ -1,0 +1,7 @@
+library(Seurat)
+library(SeuratData)
+library(SeuratWrappers)
+library(Azimuth)
+library(ggplot2)
+library(patchwork)
+options(future.globals.maxSize = 1e+10)
