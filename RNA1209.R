@@ -52,11 +52,6 @@
     labs(title = "QQ Plot, 1st 400 log adjusted values")
 
   normality_figure <- (hist | qqplot) / (log_hist | log_qqplot)
-  
-  hist
-  qqplot
-  log_hist
-  log_qqplot
   normality_figure
   
   shapiro.test(long_pool$values)

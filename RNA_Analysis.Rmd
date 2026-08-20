@@ -1,36 +1,38 @@
 ---
 title: "RNA Analysis"
-output: html_document
-date: "2026-06-26"
+author: "Lucy Huang"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_html: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
+library(tufte)
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(cache.extra = packageVersion('tufte'))
+options(htmltools.dir.version = FALSE)
 ```
 
-## Introduction
+# Abstract
 
-### Abstract
+# Objectives
 
-### Objectives
+# Methods
 
-### Methods
-
-### Results
-
-## R Code
-
-### Libraries
+## Libraries
 ```{r libraries, message = FALSE}
   library("tidyverse")
-  library("ComplexHeatmap")
+#  library("ComplexHeatmap")
   library("circlize")
   library("ClassComparison")
   library("effectsize")
   library("magrittr")
+  library("qqplotr")
+  library("patchwork")
+  library("pheatmap")
 ```
-### Data Loading and Processing
+## Data Loading and Processing
 ```{r data}
   setwd("C:/Users/Lyhuang/Downloads/Data")
 
@@ -90,7 +92,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 First the working directory is set. Then, the data is loaded in from 2 sources: sample data from Samples.csv and genetic data from pool.tpm_gene.csv.The genetic data has the function log_2(x + 1) applied and the data is arranged for ease of legibility for the proceeding data analysis.
 
-### Data Analysis
+## Data Analysis
 ```{r}
   a_mttest <- MultiTtest(a_data, a_classes, na.rm = FALSE)
   a_bum <- Bum(a_mttest@p.values)
@@ -111,9 +113,10 @@ Using MultTtest, multiple t-tests are run to produce p-values for the significan
   c_significant_genes <- c_data[selectSignificant(c_bum, alpha = .05,by = "FDR"),] %>% na.omit()
 ```
 This is then repeated to compare
-### Graphs
 
-### Acknowledgements and Citations
+# Results
+
+# Acknowledgements and Citations
 
 
 
